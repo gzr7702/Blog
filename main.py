@@ -48,6 +48,28 @@ rot13_form = """
     <input type="submit">
 </form>
 """
+signup_form= """
+<form method="post">
+    <h1>Please Enter your information</h1>
+    <br>
+        Username
+        <input size="25" height="50" type="text" name="username" value="%(txt)s">
+    <br>
+    <br>
+        Password
+        <input size="25" height="50" type="text" name="password" value="%(txt)s">
+    <br>
+    <br>
+        Verify password
+        <input size="25" height="50" type="text" name="verify" value="%(txt)s">
+    <br>
+    <br>
+        Email
+        <input size="25" height="50" type="text" name="email" value="%(txt)s">
+    <br>
+    <input type="submit">
+</form>
+"""
 
 months = ['January',
           'February',
@@ -118,21 +140,20 @@ class Rot13(webapp2.RequestHandler):
         self.response.out.write(rot13_form % {"txt":txt})
 
     def rot13(self, text):
-        asciibet = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'
+        asciiupper = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+        asciilower = 'abcdefghijklmnopqrstuvwxyz'
         new_str = []
         for c in text:
-            if c in asciibet:
-                ordc = ord(c)
-                if (ordc >= 65 and ordc <= 90):
-                    new_char = ordc + 13
-                    if new_char > 90:
-                        new_char = new_char - 90 + 65
-                    new_str.append(chr(new_char))
-                if (ordc >= 97 and ordc <= 122):
-                    new_char = ordc + 13
-                    if new_char > 97:
-                        new_char = new_char - 122 + 97
-                    new_str.append(chr(new_char))
+            ordc = ord(c)
+            new_char = ordc + 13
+            if c in asciiupper:
+                if new_char > 90:
+                    new_char = new_char - 90 + 64
+                new_str.append(chr(new_char))
+            elif c in asciilower:
+                if new_char > 122:
+                    new_char = new_char - 122 + 96
+                new_str.append(chr(new_char))
             else:
                 new_str.append(c)
         return "".join(new_str)
@@ -144,5 +165,16 @@ class Rot13(webapp2.RequestHandler):
         txt = self.request.get('text')
         self.write_form(self.rot13(txt))
 
-app = webapp2.WSGIApplication([('/', MainHandler), ('/thanks', ThanksHandler), ('/unit2/rot13', Rot13)], debug=True)
+class Signup(webapp2.RequestHandler):
+    def write_form(self, txt=""):
+        self.response.out.write(signup_form % {"txt":txt})
+
+    def get(self):
+        self.write_form()
+
+    def post(self):
+        txt = self.request.get('username')
+        self.write_form(self.signup(txt))
+
+app = webapp2.WSGIApplication([('/', MainHandler), ('/thanks', ThanksHandler), ('/unit2/rot13', Rot13), ('/unit2/signup', Signup)], debug=True)
                               
